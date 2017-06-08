@@ -1,0 +1,29 @@
+{
+  "name": "ts-hapi-errors",
+  "longName": "Common error formatting for Hapi.js",
+  "version": "1.0.0",
+  "dependencies": {
+    "elv": "^1.0.0",
+    "tetrascience/ts-errors": "1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "eslint": "^3.19.0",
+    "nyc": "^11.0.2",
+    "tetrascience/eslint-config-tetrasciece": "1.0.0"
+  },
+  "keywords": [
+    "errors",
+    "hapi"
+  ],
+  "main": "./lib",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tetrascience/ts-lib-hapi-errors"
+  },
+  "scripts": {
+    "lint": "eslint ./**/*.js",
+    "test": "NODE_ENV=test nyc --reporter=lcov  --reporter=text mocha --recursive ./test"
+  }
+}
