@@ -1,3 +1,6 @@
 {
-  "extends": ["tetrascience"]
+  "extends": "tetrascience",
+  "rules": {
+    "strict": 0
+  }
 }

@@ -4,13 +4,14 @@
   "version": "1.0.0",
   "dependencies": {
     "elv": "^1.0.0",
-    "tetrascience/ts-errors": "1.0.0"
+    "ts-errors": "tetrascience/ts-lib-errors-node"
   },
   "devDependencies": {
     "chai": "^4.0.2",
     "eslint": "^3.19.0",
-    "nyc": "^11.0.2",
-    "tetrascience/eslint-config-tetrasciece": "1.0.0"
+    "eslint-config-tetrascience": "tetrascience/eslint-config-tetrascience",
+    "mocha": "^3.4.2",
+    "nyc": "^11.0.2"
   },
   "keywords": [
     "errors",

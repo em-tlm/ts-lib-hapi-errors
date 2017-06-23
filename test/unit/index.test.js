@@ -8,7 +8,7 @@ const reply = require('../mocks/reply');
 
 
 describe('#handleError', () => {
-  const CT = 'Content-Type';
+  const CT = 'content-type';
   const JT = 'application/json';
 
   it('should throw if e is not an object', () => {
@@ -123,8 +123,8 @@ describe('#handleError', () => {
   });
 
   describe('CredentialsError', () => {
-    const WWWA_KEY = 'WWW-Authenticate';
-    const WWWA = 'hawk';
+    const WWWA_KEY = 'www-authenticate';
+    const WWWA = 'digest';
 
     it('should create a 401 reply', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
