@@ -1,6 +1,6 @@
 # ts-hapi-errors
 
-Transforms [Common Errors](https://github.com/tetrascience/ts-lib-errors-node) into a Hapi.js Reply object.
+Transforms [Common Errors](https://github.com/tetrascience/ts-lib-errors-nodejs) into a Hapi.js Reply object.
 
 ## Usage
 
