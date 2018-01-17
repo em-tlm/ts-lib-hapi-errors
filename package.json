@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "elv": "^1.0.0",
-    "ts-errors": "tetrascience/ts-lib-errors-node"
+    "ts-errors": "tetrascience/ts-lib-errors-nodejs"
   },
   "devDependencies": {
     "chai": "^4.0.2",
