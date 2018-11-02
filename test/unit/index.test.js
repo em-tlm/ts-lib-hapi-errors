@@ -1,11 +1,9 @@
-'use strict';
-
-const assert = require('chai').assert;
+const { describe, it } = require('mocha');
+const { assert } = require('chai');
+const Boom = require('boom');
 const errors = require('ts-errors');
 
 const handleError = require('../../lib');
-const reply = require('../mocks/reply');
-
 
 describe('#handleError', () => {
   const CT = 'content-type';
@@ -13,410 +11,352 @@ describe('#handleError', () => {
 
   it('should throw if e is not an object', () => {
     assert.throws(() => {
-      handleError(123, reply);
+      handleError(123);
     }, TypeError);
   });
 
   it('should throw if e is null', () => {
     assert.throws(() => {
-      handleError(null, reply);
+      handleError(null);
     }, TypeError);
   });
 
-  it('should throw if reply is not a function', () => {
-    assert.throws(() => {
-      handleError({ message: 'test' }, 123);
-    }, TypeError);
+  it('should handle Boom error', () => {
+    const err = Boom.badRequest();
+    assert.strictEqual(handleError(err), err);
   });
 
   describe('FormatError', () => {
     it('should create a 400 reply', () => {
       const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 400);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 400);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = new errors.FormatError();
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
   });
 
   describe('ValidationError', () => {
     it('should create a 400 reply', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 400);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 400);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
 
     it('should have payload with a data key', () => {
       const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'data');
+      const result = handleError(e);
+      assert.property(result, 'data');
     });
 
     it('should have payload with a data key equal to data for error', () => {
       const e = new errors.ValidationError(123);
-      const res = handleError(e, reply);
-      assert.strictEqual(res.payload.data, 123);
-    });
-
-    it('should not have any other keys than message or data', () => {
-      const e = new errors.ValidationError();
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 2);
-      assert.include(keys, 'message');
-      assert.include(keys, 'data');
+      const { data } = handleError(e);
+      assert.strictEqual(data, 123);
     });
   });
 
   describe('CredentialsError', () => {
-    const WWWA_KEY = 'www-authenticate';
+    const WWWA_KEY = 'WWW-Authenticate';
     const WWWA = 'digest';
 
     it('should create a 401 reply', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 401);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 401);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
 
     it('should throw if e.data is not a string', () => {
       assert.throws(() => {
         const e = new errors.CredentialsError(undefined, 42);
-        handleError(e, reply);
+        handleError(e);
       }, TypeError);
     });
 
     it('should create WWW-Authenticate header', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.property(res.headers, WWWA_KEY);
+      const { output } = handleError(e);
+      assert.property(output.headers, WWWA_KEY);
     });
 
     it('should create WWW-Authenticate header equal to e.data', () => {
       const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[WWWA_KEY], WWWA);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = new errors.CredentialsError(undefined, WWWA);
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.include(output.headers[WWWA_KEY], WWWA);
     });
   });
 
   describe('UnauthorizedError', () => {
     it('should create a 403 reply', () => {
       const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 403);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 403);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = new errors.UnauthorizedError();
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
   });
 
   describe('NotFoundError', () => {
     it('should create a 404 reply', () => {
       const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 404);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 404);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = new errors.NotFoundError();
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
   });
 
   describe('ConcurrencyError', () => {
     it('should create a 409 reply', () => {
       const e = new errors.ConcurrencyError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 409);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 409);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.ConcurrencyError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.ConcurrencyError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.ConcurrencyError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.ConcurrencyError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
 
     it('should include data if included in the error', () => {
       const e = new errors.ConcurrencyError(123);
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'data');
+      const result = handleError(e);
+      assert.property(result, 'data');
     });
   });
 
   describe('ExistsError', () => {
     it('should create a 409 reply', () => {
       const e = new errors.ExistsError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 409);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 409);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.ExistsError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.ExistsError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.ExistsError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.ExistsError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
 
     it('should include data if included in the error', () => {
       const e = new errors.ExistsError(123);
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'data');
+      const response = handleError(e);
+      assert.property(response, 'data');
     });
   });
 
   describe('TempUnavailableError', () => {
     it('should create a 503 reply', () => {
       const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 503);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 503);
     });
 
     it('should have JSON Content-Type', () => {
       const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = new errors.TempUnavailableError();
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
   });
 
   describe('Default', () => {
     it('should create a 500 reply', () => {
       const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      assert.strictEqual(res.statusCode, 500);
+      const { output } = handleError(e);
+      assert.strictEqual(output.statusCode, 500);
     });
 
     it('should have JSON Content-Type', () => {
       const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      assert.strictEqual(res.headers[CT], JT);
+      const { output } = handleError(e);
+      assert.strictEqual(output.headers[CT], JT);
     });
 
     it('should have an object payload', () => {
       const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      assert.isObject(res.payload);
+      const { output } = handleError(e);
+      assert.isObject(output.payload);
     });
 
     it('should have payload with a message key', () => {
       const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      assert.property(res.payload, 'message');
+      const { output } = handleError(e);
+      assert.property(output.payload, 'message');
     });
 
     it('should have payload with a message key that is a string', () => {
       const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      assert.isString(res.payload.message);
-    });
-
-    it('should not have any other keys than message', () => {
-      const e = { message: 'Default' };
-      const res = handleError(e, reply);
-      const keys = Object.keys(res.payload);
-      assert.strictEqual(keys.length, 1);
-      assert.strictEqual(keys[0], 'message');
+      const { output } = handleError(e);
+      assert.isString(output.payload.message);
     });
   });
 });
